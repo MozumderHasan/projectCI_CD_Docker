@@ -1,0 +1,39 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: moby/setup-buildx-action@v1
+
+      - name: Build Docker image
+        run: docker buildx build -t my-flask-app .
+
+      - name: Push Docker image to Docker Hub
+        uses: docker/push-action@v3
+        with:
+          username: ${{ secrets.hasanweight }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          repository: my-flask-app
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Pull Docker image from Docker Hub
+        run: docker pull my-flask-app
+
+#     - name: Deploy Docker image to Heroku
+ #       uses: akhileshns/heroku-deploy@v4
+  #      with:
+   #       api_key: ${{ secrets.HEROKU_API_KEY }}
+         # app_name: my-flask-app
